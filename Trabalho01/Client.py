@@ -33,7 +33,7 @@ def signIn(username, password):
 def checkUsername(username):
     # TODO: Check username
 
-    return -1
+    return False
 
 def signUp(username, password):
     # TODO: Sign Up Method for registering users.
@@ -81,6 +81,7 @@ def storeUserCredentials(username, password, userkeys):
 
 def loginMenu():
     logginMenu = True
+    mainMenu = False
     while(logginMenu):
         print(" Welcome to client.py ")
         print(" Please, Log In or Sign Up")
@@ -92,6 +93,7 @@ def loginMenu():
         if menu == '0':
             print(" Closing...")
             logginMenu = False
+            mainMenu = False
             sys.exit()
 
         elif menu == '1':
@@ -99,25 +101,37 @@ def loginMenu():
             usernameData = input('Username: ')
             passwordData = input('Password: ')
 
-            # TODO: Check credentials.
-            # TODO: If okay, move to next step
+            if(signIn(usernameData, passwordData)):
+                # TODO: If okay, move to next step 
+                loginMenu = False
+                mainMenu = True
+            else:
+                print(" Sorry, wrong credentials, try again! ")             
 
         
         elif menu == '2':
             print(' Please add your information: ')
             usernameData = input('Username: ')
-            # TODO: Only continue when valid username.
-            nameData = input('Name: ')
-            passwordData = input('Password: ')
+            if(checkUsername(usernameData)):
+                # TODO: Only continue when valid username.
+                nameData = input('Name: ')
+                passwordData = input('Password: ')
 
             # TODO: Save credentials, move to next step.
             
+    return mainMenu
+
+def mainMenu():
+    return -1
 
 def main():
 
     # Step 1 - Login user
-    loginMenu()
+    if(loginMenu()):
+        mainMenu()
 
+    else:
+        sys.exit()
     # TODO: Step 2 - Menu for interaction.
 
     return -1
