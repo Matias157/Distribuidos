@@ -1,4 +1,5 @@
 
+from __future__ import print_function
 import Pyro4
 
 @Pyro4.expose
