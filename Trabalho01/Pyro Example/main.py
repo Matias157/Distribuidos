@@ -3,7 +3,7 @@ import Pyro4
 import Pyro4.util
 import sys
 
-from Client import Person
+from Person import Person
 
 sys.excepthook = Pyro4.util.excepthook
 
