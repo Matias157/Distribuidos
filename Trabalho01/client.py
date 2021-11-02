@@ -101,9 +101,9 @@ class Client(object):
             encoding=serialization.Encoding.PEM,
             format=serialization.PublicFormat.SubjectPublicKeyInfo
             )
+        self.pem = self.pem.decode()
 
     def start(self):
-        
         # User Menu
         while(True):
             # Print welcoming menu
@@ -111,7 +111,6 @@ class Client(object):
             choice = input(">: ").strip()
 
             if choice == 'z' or choice == 'Z':
-                print("")
                 self.createPublicKey()
                 existingUsers = self.surveyServer.getUsers()
                 print("Please, type your desired username.")
@@ -147,14 +146,15 @@ class Client(object):
                 # Take available time for user until it hits c/C
                 while(True):
                     time = input(">: ").strip()
+                    if time == 'c' or time == 'C':
+                        break
                     try:
                         naive_datetime = datetime.datetime.strptime(time, "%Y-%m-%d %H:%M:%S")
                         times[time] = []
                         times[time].append(0)
                     except Exception as e:
                         print(e)
-                    if time == 'c' or time == 'C':
-                        break
+                    
                 # Take deadline from user.
                 surveyDeadline = input("Deadline: ")
                 try:
@@ -169,24 +169,24 @@ class Client(object):
             # Vote on existing survey menu
             elif choice == 's' or choice == 'S':
                 printableMenu(4)
-                openSurveys = self.surveyServer.getSurveys()
-                print(*openSurveys, sep = '\n')
+                openSurveys = self.surveyServer.getSurveysInfo()
+                print(openSurveys)
                 print("Please, type the name of a survey you would like to vote.")
                 surveyName = input(">: ").strip()
 
                 print("Please, choose one of the time slots to vote")
                 print("Reminder: use yyyy-mm-dd hh:mm:ss format. \nUse c to stop voting.")
-                # TODO: Show time slots to user.
                 votes = []
                 while(True):
                     vote = input(">: ").strip()
+                    if vote == 'c' or vote == 'C':
+                        break
                     try:
                         naive_datetime = datetime.datetime.strptime(vote, "%Y-%m-%d %H:%M:%S")
                         votes.append(vote)
                     except Exception as e:
                         print(e)
-                    if vote == 'c' or vote == 'C':
-                        break
+                    
                 
                 results = self.surveyServer.voteSurvey(surveyName, self.name, votes)
                 print(results)
@@ -194,13 +194,12 @@ class Client(object):
             # Consulting survey menu
             elif choice == 'd' or choice == 'D':
                 printableMenu(5)
-                openSurveys = self.surveyServer.getSurveys()
+                all = True
+                openSurveys = self.surveyServer.getSurveys(all)
                 print(*openSurveys, sep = '\n')
                 print("Please, type the name of a survey you would like to consult.")
                 surveyName = input(">: ").strip()
-
-                signature = self.sign()
-                results = self.surveyServer.consultSurvey(self.name, surveyName, signature)
+                results = self.surveyServer.consultSurvey(self.name, surveyName, self.sign())
                 print(results)
 
             elif choice == 'c' or choice == 'C':
