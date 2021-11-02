@@ -1,7 +1,8 @@
 # ------------------------------
 # Trabalho 1 - Sistemas Distribuídos
-# Autores: Matheus Fonseca Alexandre de Oliveira
+# Autores: 
 # Alexandre Herrero matias
+# # Matheus Fonseca Alexandre de Oliveira
 # Professor: Ana Cristina Vendramin
 # Projeto: Doodle
 # ------------------------------
@@ -11,6 +12,7 @@
 import Pyro4
 import sys
 import datetime
+import threading
 
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives.asymmetric import padding
@@ -86,6 +88,7 @@ class Client(object):
             ),
             hashes.SHA256()
         )
+        return signature
 
     def createPublicKey(self):
         self.private_key = rsa.generate_private_key(
@@ -143,7 +146,7 @@ class Client(object):
                 times = {}
                 # Take available time for user until it hits c/C
                 while(True):
-                    time = input().strip()
+                    time = input(">: ").strip()
                     try:
                         naive_datetime = datetime.datetime.strptime(time, "%Y-%m-%d %H:%M:%S")
                         times[time] = []
@@ -199,10 +202,26 @@ class Client(object):
                 signature = self.sign()
                 results = self.surveyServer.consultSurvey(self.name, surveyName, signature)
                 print(results)
-                
+
             elif choice == 'c' or choice == 'C':
                 printableMenu(0)
                 sys.exit()
 
+class DaemonThread(threading.Thread):
+    def __init__(self, client):
+        threading.Thread.__init__(self)
+        self.client = client
+        self.setDaemon(True)
+
+    def run(self):
+        with Pyro4.core.Daemon() as daemon:
+            daemon.register(self.client)
+            daemon.requestLoop(lambda: not self.client.abort)
+
+client = Client()
+daemonthread = DaemonThread(client)
+daemonthread.start()
+client.start()
+print('Exit.')
 
 
