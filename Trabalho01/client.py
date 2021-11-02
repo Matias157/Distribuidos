@@ -191,7 +191,15 @@ class Client(object):
             # Consulting survey menu
             elif choice == 'd' or choice == 'D':
                 printableMenu(5)
+                openSurveys = self.surveyServer.getSurveys()
+                print(*openSurveys, sep = '\n')
+                print("Please, type the name of a survey you would like to consult.")
+                surveyName = input(">: ").strip()
 
+                signature = self.sign()
+                results = self.surveyServer.consultSurvey(self.name, surveyName, signature)
+                print(results)
+                
             elif choice == 'c' or choice == 'C':
                 printableMenu(0)
                 sys.exit()
