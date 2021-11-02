@@ -1,6 +1,7 @@
 import Pyro4
 import datetime
 import base64
+import threading
 import cryptography.exceptions
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.hazmat.backends import default_backend
@@ -12,6 +13,9 @@ class Survey(object):
     def __init__(self):
         self.surveys = {}
         self.users = {}
+
+        self.thread_surveys = threading.Thread(target=self.notifySurvey, daemon=True)
+        self.thread_surveys.start()
 
     def getSurveys(self):
         return list(self.surveys.keys())
@@ -94,6 +98,34 @@ class Survey(object):
             return(retorno)
         else:
             return("Permission denied!")
+
+    def notifySurvey(self):
+        while(True):
+            surveycreated = self.getSurveys()
+            if surveycreated:
+                for survey in self.surveys:
+                    for (s, n, p, t, d, state) in self.surveys[survey]:
+                        if (state == "Ongoing"):
+                            names = []
+                            for user in self.users:
+                                for (nn, pk, c) in self.users[user]:
+                                    names.append(nn)
+                            surveynames = n
+                            names.sort()
+                            surveynames.sort()
+                            if (names == surveynames or datetime.datetime.now().timestamp() >= datetime.datetime.strptime(d, "%Y-%m-%d %H:%M:%S").timestamp()):
+                                returnStr = "\nSurvey " + s + " has finished!\nMost voted times:\n"
+                                for time in t:
+                                    returnStr += " - " + time + " - votes: " + str(t[time][0]) + "\n"
+                                for name in names:
+                                    self.publish(name, returnStr)
+                                self.surveys[survey][0] = (self.surveys[survey][0][0], self.surveys[survey][0][1], self.surveys[survey][0][2], self.surveys[survey][0][3], self.surveys[survey][0][4], "Closed")
+                            else:
+                                pass
+                        else:
+                            pass
+            else:
+                pass
 
     def publish(self, name, msg):
         for (name, publickey, callback) in self.users[name][:]:
