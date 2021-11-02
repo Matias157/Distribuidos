@@ -58,11 +58,12 @@ class Client(object):
             print("The following people are on the server: ")
             for user in users:
                 print(user)
-        surveys = self.surveyServer.getSurveys()
+        surveys = self.surveyServer.getSurveys(True)
         if surveys:
-            print("The following surveys already exist: ")
-            for survey in surveys:
-                print(survey)
+            print(self.surveyServer.getSurveysInfo())
+            #print("The following surveys already exist: ")
+            #for survey in surveys:
+            #    print(survey)
         self.name = input('Inform your name: ').strip()
         self.privateKey()
         self.saveKey(self.name + "PrivateKey.pem", self.private_key)

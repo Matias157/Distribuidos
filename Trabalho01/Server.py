@@ -17,11 +17,27 @@ class Survey(object):
         self.thread_surveys = threading.Thread(target=self.notifySurvey, daemon=True)
         self.thread_surveys.start()
 
-    def getSurveys(self):
-        return list(self.surveys.keys())
+    def getSurveys(self, all):
+        if all == True:
+            return list(self.surveys.keys())
+        else:
+            resturnSurveys = []
+            for survey in self.surveys:
+                for (s, n, p, t, d, state) in self.surveys[survey]:
+                    if state == "Ongoing":
+                        resturnSurveys.append(survey)
+            return(resturnSurveys)
 
     def getUsers(self):
         return list(self.users.keys())
+
+    def getSurveysInfo(self):
+        returnString = ""
+        for survey in self.surveys:
+            for (s, n, p, t, d, state) in self.surveys[survey]:
+                if state == "Ongoing":
+                    returnString += "------------------\nSurvey: " + s + "\nCreator: " + n[0] + "\nPlace: " + p + "\nProposed times: " + str(t) + "\nDeadline: " + d + "\n------------------\n"
+        return(returnString)
 
     def verifySignature(self, publicKey, signature):
         message = b"A message I want to sign"
@@ -68,8 +84,9 @@ class Survey(object):
             raise ValueError("invalid survey")
         for (s, n, p, t, d, state) in self.surveys[survey]:
             if name in n:
-                raise ValueError("user already on survey")
-                break
+                return("user already on survey")
+            if state != "Ongoing":
+                return("survey already finished")
         n.append(name)
         for time in times:
             for (s, n, p, t, d, state) in self.surveys[survey]:
@@ -101,11 +118,11 @@ class Survey(object):
 
     def notifySurvey(self):
         while(True):
-            surveycreated = self.getSurveys()
+            surveycreated = self.getSurveys(True)
             if surveycreated:
                 for survey in self.surveys:
                     for (s, n, p, t, d, state) in self.surveys[survey]:
-                        if (state == "Ongoing"):
+                        if state == "Ongoing":
                             names = []
                             for user in self.users:
                                 for (nn, pk, c) in self.users[user]:
