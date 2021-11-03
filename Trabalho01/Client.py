@@ -2,7 +2,7 @@
 # Trabalho 1 - Sistemas Distribuídos
 # Autores: 
 # Alexandre Herrero matias
-# # Matheus Fonseca Alexandre de Oliveira
+# Matheus Fonseca Alexandre de Oliveira
 # Professor: Ana Cristina Vendramin
 # Projeto: Doodle
 # ------------------------------
