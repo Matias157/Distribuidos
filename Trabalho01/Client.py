@@ -68,16 +68,19 @@ def printableMenu(option):
 class Client(object):
 
     def __init__(self):
+        # Conecta com o server através do servidor de nomes.
         self.surveyServer = Pyro4.Proxy('PYRONAME:survey.server')
+        # Para abortar a thread da classe em casos específicos
         self.abort = 0
         
-
+    # Expondo o método pra ser executado pelo servidor
     @Pyro4.expose
     @Pyro4.oneway
     # Server callback to print messages.
     def message(self, username, message):
         print(message)
 
+    # Assinatura do client. Não assinamos uma mensagem em si, mas sim uma mensagem base nos dois lados (server e cliente), e utilizamos a assinatura gerada para confirmar se é a mesma pessoa.
     def sign(self):
         message = b"A message I want to sign"
         signature = self.private_key.sign(
@@ -90,6 +93,7 @@ class Client(object):
         )
         return signature
 
+    # Gera a chave pública (e privada) do cliente, usando uma configuração base do RSA. Gera também a chave em formato PEM em String para facilitar a passagem dos dados pelo Pyro
     def createPublicKey(self):
         self.private_key = rsa.generate_private_key(
             public_exponent=65537,
@@ -103,32 +107,41 @@ class Client(object):
             )
         self.pem = self.pem.decode()
 
+    # Método principal do Objeto.
     def start(self):
-        # User Menu
+        # First while - User Menu Interaction
         while(True):
             # Print welcoming menu
             printableMenu(1)
             choice = input(">: ").strip()
 
+            # Option 1 - Create Account
             if choice == 'z' or choice == 'Z':
+                # Generate Public Key for this client process
                 self.createPublicKey()
+
+                # Get List of existing Users from server
                 existingUsers = self.surveyServer.getUsers()
                 print("Please, type your desired username.")
+
+                # Wait for user to write one available name to use
                 while(True):
                     username = input(">: ").strip()
                     if username in existingUsers:
                         print(" Username not available, try again!")
                     else:
                         break
+                # Proceeds with user registration
                 self.name = username
                 self.surveyServer.registerUser(self.name, self.pem, self)
                 break
 
+            # Option to leave the program
             elif choice == 'c' or choice == 'C':
                 printableMenu(0)
                 sys.exit()
 
-        # User logged in
+        # While menu for Users already logged in
         while(True):
             # Print main menu
             printableMenu(2)
@@ -142,6 +155,7 @@ class Client(object):
                 surveyPlace = input("Place: ").strip()
                 print("Available times: (to stop adding use c)")
 
+                # Since user can add multiple timeslots, this will be done inside one dictionary
                 times = {}
                 # Take available time for user until it hits c/C
                 while(True):
@@ -149,16 +163,21 @@ class Client(object):
                     if time == 'c' or time == 'C':
                         break
                     try:
+                        # Check if the written time is correct, transforming it correctly using datetime. This will be cross checked on server side
                         naive_datetime = datetime.datetime.strptime(time, "%Y-%m-%d %H:%M:%S")
                         times[time] = []
                         times[time].append(0)
+                        # Writing wrong format will terminate the program.
                     except Exception as e:
                         print(e)
                     
                 # Take deadline from user.
                 surveyDeadline = input("Deadline: ")
                 try:
+                    # Check if the written time is correct, transforming it correctly using datetime. This will be cross checked on server side
                     naive_datetime = datetime.datetime.strptime(surveyDeadline, "%Y-%m-%d %H:%M:%S")
+                    
+                    # Writing wrong format will terminate the program.
                 except Exception as e:
                     print(e)
 
@@ -169,6 +188,7 @@ class Client(object):
             # Vote on existing survey menu
             elif choice == 's' or choice == 'S':
                 printableMenu(4)
+                # Get Ongoing Surveys Data to show to user
                 openSurveys = self.surveyServer.getSurveysInfo()
                 print(openSurveys)
                 print("Please, type the name of a survey you would like to vote.")
@@ -177,35 +197,45 @@ class Client(object):
                 print("Please, choose one of the time slots to vote")
                 print("Reminder: use yyyy-mm-dd hh:mm:ss format. \nUse c to stop voting.")
                 votes = []
+                # Since user can vote on multiple time slots, this will added on the list
                 while(True):
                     vote = input(">: ").strip()
                     if vote == 'c' or vote == 'C':
                         break
                     try:
+                        # Check if the written time is correct, transforming it correctly using datetime. This will be cross checked on server side
                         naive_datetime = datetime.datetime.strptime(vote, "%Y-%m-%d %H:%M:%S")
                         votes.append(vote)
+                        # Writing wrong format will terminate the program.
+                        # Bonus: you can vote multiple times on the same timeslot here, since we compute all votes in one go only later.
                     except Exception as e:
                         print(e)
                     
-                
+                # Send the votes to server
                 results = self.surveyServer.voteSurvey(surveyName, self.name, votes)
                 print(results)
 
             # Consulting survey menu
             elif choice == 'd' or choice == 'D':
                 printableMenu(5)
+                # Gets all surveys (ongoing and closed) to show to user, since here he can consult all surveys available
                 all = True
                 openSurveys = self.surveyServer.getSurveys(all)
+                # Print each survey name per line
                 print(*openSurveys, sep = '\n')
                 print("Please, type the name of a survey you would like to consult.")
                 surveyName = input(">: ").strip()
+                # Get the results from the survey in the server.
+                # Here, server handles if: user already voted (has permission to see), user didn't voted (permission denied), signature from user is correct (sign, verify)
                 results = self.surveyServer.consultSurvey(self.name, surveyName, self.sign())
                 print(results)
 
+            # Option to leave the program
             elif choice == 'c' or choice == 'C':
                 printableMenu(0)
                 sys.exit()
 
+# Following <chatbox> example, we create threads for the class to run
 class DaemonThread(threading.Thread):
     def __init__(self, client):
         threading.Thread.__init__(self)
