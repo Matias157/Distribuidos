@@ -36,13 +36,16 @@ SURVEYS =   {
                                                             "2021-12-03 12:00:00": 0
                                                         }
                                                     ], 
-                                "deadline": "2021-12-25 12:00:00",
+                                "deadline": "2021-11-21 16:54:00",
                                 "state": "Ongoing"
                             }
             }
 USERS = {
             "Alexandre":    {
                                 "name": "Alexandre"
+                            },
+            "Matheus":      {
+                                "name": "Matheus"
                             }
         }
 
@@ -78,7 +81,7 @@ def postSurvey():
         SURVEYS[request_data["name"]] = {"name": request_data["name"], "attendants": [request_data["creator"]], "place": request_data["place"], "proposed_times":[], "deadline": request_data["deadline"], "state": "Ongoing"}
         for time in request_data["proposed_times"]:
             SURVEYS[request_data["name"]]["proposed_times"].append({time: 0})
-        sse.publish("\n------------------\nNew survey created!\n" + "Survey: " + request_data["name"] + "\nCreator: " + request_data["creator"] + "\nPlace: " + request_data["place"] + "\nProposed times: " + str(request_data["proposed_times"]) + "\nDeadline: " + request_data["deadline"] + "\n------------------", channel=request_data["name"])
+        sse.publish("\n------------------\nNew survey created!\n" + "Survey: " + request_data["name"] + "\nCreator: " + request_data["creator"] + "\nPlace: " + request_data["place"] + "\nProposed times: " + str(request_data["proposed_times"]) + "\nDeadline: " + request_data["deadline"] + "\n------------------")
     return SURVEYS[request_data["name"]]
 
 @app.route("/user", methods=["POST"])
@@ -121,5 +124,53 @@ def voteSurvey():
                 pass
     return "Vote has been Successfully Computed!"
 
+@app.route("/survey/consult", methods=["GET"])
+def consultSurvey():
+    survey = request.args.get("survey")
+    name = request.args.get("name")
+    if not survey or not name:
+        return "Bad Request!"
+    if survey not in SURVEYS:
+        return "Survey does not Exists!"
+    if name not in SURVEYS[survey]["attendants"]:
+        return "Permission denied!"
+    return_string = "\n------------------\nUsers that already voted:\n"
+    for name_u in SURVEYS[survey]["attendants"]:
+        return_string += " - " + name_u + "\n"
+    return_string += "Proposed times:\n"
+    for time_s in SURVEYS[survey]["proposed_times"]:
+        for time in time_s:
+            return_string += " - " + time + " - votes: " + str(time_s[time]) + "\n"
+    return_string += "State of the survey:\n - " + SURVEYS[survey]["state"] + "\n------------------"
+    return return_string
+
+def notifySurvey():
+    with app.app_context():
+        while(True):
+            if list(SURVEYS.keys()):
+                for survey in SURVEYS:
+                    if SURVEYS[survey]["state"] == "Ongoing":
+                        survey_names = SURVEYS[survey]["attendants"]
+                        names = []
+                        for user in USERS:
+                            names.append(USERS[user]["name"])
+                        names.sort()
+                        survey_names.sort()
+                        if names == survey_names or datetime.datetime.now().timestamp() >= datetime.datetime.strptime(SURVEYS[survey]["deadline"], "%Y-%m-%d %H:%M:%S").timestamp():
+                            return_string = "\nSurvey " + survey + " has finished!\nMost voted times:\n"
+                            for time_s in SURVEYS[survey]["proposed_times"]:
+                                for time in time_s:
+                                    return_string += " - " + time + " - votes: " + str(time_s[time]) + "\n"
+                            sse.publish(return_string, channel=survey)
+                            SURVEYS[survey]["state"] = "Closed"
+                        else:
+                            pass
+                    else:
+                        pass
+            else:
+                pass
+
 if __name__ == '__main__':
+    thread_surveys = threading.Thread(target=notifySurvey, daemon=True)
+    thread_surveys.start()
     app.run(debug=True)
