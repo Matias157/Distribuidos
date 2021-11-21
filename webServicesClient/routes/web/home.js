@@ -13,9 +13,9 @@ router.post('/newSurveyPost', urlencodedParser, function (req, res) {
     console.log(req.body);
 
     const options = {
-        hostname: 'www.google.com',
-        port: 443,
-        //path: '/todos',
+        hostname: 'localhost',
+        port: 5000,
+        path: '/survey',
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -26,7 +26,7 @@ router.post('/newSurveyPost', urlencodedParser, function (req, res) {
 
     console.log(data);
 
-    const req1 = https.request(options, res => {
+    const req1 = http.request(options, res => {
         console.log(`statusCode: ${res.statusCode}`)
 
         res.on('data', d => {

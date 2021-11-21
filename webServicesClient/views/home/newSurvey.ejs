@@ -10,8 +10,12 @@
       <div class="panel-body">
         <form class="form-survey" method="POST" action="/newSurveyPost">
             <div class="input-group">
-              <input type="text" class="form-control" placeholder="Survey Name" name="surveyName"
+              <input type="text" class="form-control" placeholder="Survey Name" name="name"
                 aria-describedby="basic-addon1">
+            </div>
+            <br />
+            <div class="input-group">
+              <input type="text" class="form-control" placeholder="Creator" name="creator" aria-describedby="basic-addon1">
             </div>
             <br />
             <div class="input-group">
@@ -23,7 +27,7 @@
             <label>Please write as yyy-mm-dd hh:mm:ss</label>
             <button type="button" id="add-times">+</button>
             <div class="input-group" id="proposed-time-id">
-              <input type="text" class="form-control" name="proposedTime" aria-describedby="basic-addon1">
+              <input type="text" class="form-control" name="proposed_times" aria-describedby="basic-addon1">
             </div>
             <br />
             <label>Deadline</label>
@@ -36,7 +40,7 @@
         </form>
         <script>
           $("#add-times").click(function () {
-            $("#proposed-time-id").append('            <div class="form-group">              <input type="text" class="form-control" name="proposed-time" aria-describedby="basic-addon1">            </div><br/>')
+            $("#proposed-time-id").append('            <div class="form-group">              <input type="text" class="form-control" name="proposed_times" aria-describedby="basic-addon1">            </div><br/>')
           });
         </script>
       </div>
