@@ -2,6 +2,7 @@ const https = require('https')
 var express = require("express");
 var path = require("path");
 var bodyParser = require("body-parser");
+var session = require("express-session");
 
 var jsonParser = bodyParser.json();
 
@@ -17,6 +18,7 @@ client.set("views", path.join(__dirname, "views"));
 client.set("view engine", "ejs");
 
 client.use("/", require("./routes/web"));
+client.use("/api", require("./routes/api"));
 
 client.listen(client.get("port"), function(){
     console.log("Server started on port " + client.get("port"))

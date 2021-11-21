@@ -1,5 +1,6 @@
 <%- include('../_partial/_header'); -%>
 
+    <% if(firstPage) { %>
     <div class="col-md-8">
 
         <div class="panel panel-default">
@@ -11,7 +12,7 @@
                 </p>
             </div>
             <div class="panel-body">
-                <form class="form-survey" method="POST" action="/consultSurveyPost">
+                <form class="form-survey" method="GET" action="/consultSurveyPost">
                     <div id="form">
                         <div class="input-group">
                             <input type="text" class="form-control" placeholder="Survey Name" name="survey-name"
@@ -23,5 +24,19 @@
             </div>
         </div>
     </div>
+    <% } else { %>
+        <div class="col-md-8">
+
+            <div class="panel panel-default">
+    
+                <div class="panel-heading">
+                    <h1>Survey Details</h1>
+                </div>
+                <div class="panel-body">
+                    <% surveyDetail %>
+                </div>
+            </div>
+        </div>    
+    <% } %>
 
 <%- include('../_partial/_footer'); -%>
