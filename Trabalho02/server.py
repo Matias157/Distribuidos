@@ -136,7 +136,7 @@ def consultSurvey():
         return "Survey does not Exists!"
     if name not in SURVEYS[survey]["attendants"]:
         return "Permission denied!"
-    return_string = "\n------------------\nUsers that already voted:\n"
+    return_string = "------------------\nUsers that already voted:\n"
     for name_u in SURVEYS[survey]["attendants"]:
         return_string += " - " + name_u + "\n"
     return_string += "Proposed times:\n"

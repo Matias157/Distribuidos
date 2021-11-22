@@ -165,16 +165,16 @@ router.get("/getSurveyData", function (req, res) {
 
     var data;
 
-    req = http.request(options, res => {
-        console.log(`statusCode: ${res.statusCode}`)
+    req = http.request(options, resp => {
+        console.log(`statusCode: ${resp.statusCode}`)
 
-        res.on('data', d => {
+        resp.on('data', d => {
             data = d.toString('utf8');
-            console.log(data)
+            console.log(data);
+            data = data.replace(/(?:\r\n|\r|\n)/g, "<br />");
+            res.render("home/voteSurvey", {voteSurveyDetails: true, list: data});
         })
     })
-
-    res.render("home/voteSurvey", {voteSurveyDetails: true, list: data});
 
     req.on('error', error => {
         res.render("home/voteSurvey", {voteSurveyDetails: false});
