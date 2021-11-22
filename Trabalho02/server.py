@@ -128,6 +128,8 @@ def voteSurvey():
 def consultSurvey():
     survey = request.args.get("survey")
     name = request.args.get("name")
+    print(survey)
+    print(name)
     if not survey or not name:
         return "Bad Request!"
     if survey not in SURVEYS:

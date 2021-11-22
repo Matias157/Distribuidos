@@ -156,45 +156,31 @@ router.get("/voteSurveyPost", function(req, res){
 
 // HTTP GET Send Survey would like to consult to server
 router.get("/getSurveyData", function (req, res) {
-
     const options = {
         hostname: 'localhost',
         port: 5000,
-        path: '/survey/info', // TODO: Change here
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json'
-        }
+        path: '/survey/consult?survey=' + req.query.survey + '&name=' + req.query.name,
+        method: 'GET'
     }
 
-    const data = JSON.stringify(req.body);
+    var data;
 
-    console.log(data);
-
-    const req1 = http.request(options, res => {
+    req = http.request(options, res => {
         console.log(`statusCode: ${res.statusCode}`)
 
         res.on('data', d => {
-            process.stdout.write(d);
+            data = d.toString('utf8');
+            console.log(data)
         })
     })
 
-    req1.on('error', error => {
-        console.error(error);
+    res.render("home/voteSurvey", {voteSurveyDetails: true, list: data});
+
+    req.on('error', error => {
+        res.render("home/voteSurvey", {voteSurveyDetails: false});
     })
 
-    req1.write(data);
-    req1.end();
-
-    if(data){
-        res.render("home/consultSurvey", {firstPage: false, surveyDetail: data});
-    }
-    else{
-        res.render("home/voteSurvey", {firstPage: true});
-    }
-
-    res.render("home/voteSurvey", {voteSurveyDetails: "You submited the button!"});
-    
+    req.end()
 });
 
 

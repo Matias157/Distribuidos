@@ -12,10 +12,14 @@
                 </p>
             </div>
             <div class="panel-body">
-                <form class="form-survey" method="GET" action="/consultSurveyPost">
+                <form class="form-survey" method="GET" action="/getSurveyData">
                     <div id="form">
                         <div class="input-group">
-                            <input type="text" class="form-control" placeholder="Survey Name" name="survey-name"
+                            <input type="text" class="form-control" placeholder="Survey Name" name="survey"
+                                aria-describedby="basic-addon1">
+                        </div>
+                        <div class="input-group">
+                            <input type="text" class="form-control" placeholder="Name" name="name"
                                 aria-describedby="basic-addon1">
                         </div>
                         <input type="submit" class="btn btn-default navbar-btn" value="Submit" />
