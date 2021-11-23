@@ -3,6 +3,7 @@ var bodyParser = require("body-parser");
 const request = require('request');
 const https = require('https');
 const http = require('http');
+var flash = require('connect-flash');
 
 var urlencodedParser = bodyParser.urlencoded({ extended: false });
 
@@ -50,19 +51,21 @@ router.post('/newSurveyPost', urlencodedParser, function (req, res) {
 
     console.log(data);
 
-    const req1 = http.request(options, res => {
-        console.log(`statusCode: ${res.statusCode}`)
+    const req1 = http.request(options, resp => {
+        console.log(`statusCode: ${resp.statusCode}`)
 
-        res.on('data', d => {
-            process.stdout.write(d)
-        })
-    })
+        resp.on('data', d => {
+            process.stdout.write(d);
+            //req.flash('message','New survey created succesfully!');
+            res.render("home/newSurvey");
+        });
+    });
 
     req1.on('error', error => {
         console.error(error)
-    })
+    });
 
-    req1.write(data)
+    req1.write(data);
     req1.end();
 
 
@@ -84,49 +87,39 @@ router.get("/voteSurvey", function (req, res) {
         hostname: 'localhost',
         port: 5000,
         path: '/survey/info',
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json'
-        }
+        method: 'GET'
     }
 
-    const data = JSON.stringify(req.body);
+    var data;
 
     console.log(data);
 
-    const req1 = http.request(options, res => {
-        console.log(`statusCode: ${res.statusCode}`)
+    req = http.request(options, resp => {
+        console.log(`statusCode: ${resp.statusCode}`)
 
-        res.on('data', d => {
-            process.stdout.write(d);
+        resp.on('data', d => {
+            data = d.toString('utf8');
+            console.log(data);
+            data = data.replace(/(?:\r\n|\r|\n)/g, "<br />");
+            res.render("home/voteSurvey", {voteSurveyDetails: true, list: data});
         })
     })
 
-    req1.on('error', error => {
-        console.error(error);
+    req.on('error', error => {
+        res.render("home/voteSurvey", {voteSurveyDetails: false});
     })
 
-    req1.write(data);
-    req1.end();
-
-    if(data){
-        res.render("home/voteSurvey", {voteSurveyDetails: true, list: data});
-    }
-    else{
-        res.render("home/voteSurvey", {voteSurveyDetails: false});
-    }
-    
-    
+    req.end()
 });
 
 // HTTP POST Send Vote option to server.
-router.get("/voteSurveyPost", function(req, res){
+router.post("/voteSurveyPost", urlencodedParser, function(req, res){
     console.log(req.body);
 
     const options = {
         hostname: 'localhost',
         port: 5000,
-        path: '/survey', // TODO: Change to correct PATH
+        path: '/survey/vote',
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -137,11 +130,13 @@ router.get("/voteSurveyPost", function(req, res){
 
     console.log(data);
 
-    const req1 = http.request(options, res => {
-        console.log(`statusCode: ${res.statusCode}`)
+    const req1 = http.request(options, resp => {
+        console.log(`statusCode: ${resp.statusCode}`)
 
-        res.on('data', d => {
-            process.stdout.write(d)
+        resp.on('data', d => {
+            process.stdout.write(d);
+            res.redirect("/voteSurvey");
+            
         })
     })
 
@@ -172,12 +167,12 @@ router.get("/getSurveyData", function (req, res) {
             data = d.toString('utf8');
             console.log(data);
             data = data.replace(/(?:\r\n|\r|\n)/g, "<br />");
-            res.render("home/voteSurvey", {voteSurveyDetails: true, list: data});
+            res.render("home/consultSurvey", {firstPage: false, surveyDetail: data});
         })
     })
 
     req.on('error', error => {
-        res.render("home/voteSurvey", {voteSurveyDetails: false});
+        res.render("home/consultSurvey", {firstPage: true});
     })
 
     req.end()

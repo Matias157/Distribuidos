@@ -3,6 +3,7 @@ var express = require("express");
 var path = require("path");
 var bodyParser = require("body-parser");
 var session = require("express-session");
+var flash = require("connect-flash");
 
 var jsonParser = bodyParser.json();
 
@@ -19,6 +20,13 @@ client.set("view engine", "ejs");
 
 client.use("/", require("./routes/web"));
 client.use("/api", require("./routes/api"));
+client.use(session({
+    secret: "any198127381laskdhsl",
+    cookie: { maxAge: 60000},
+    resave: false,
+    saveUninitialized: false
+}));
+client.use(flash());
 
 client.listen(client.get("port"), function(){
     console.log("Server started on port " + client.get("port"))

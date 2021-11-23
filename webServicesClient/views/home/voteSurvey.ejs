@@ -14,16 +14,23 @@
                         <div class="panel-body">
                             <form class="form-survey" method="POST" action="/voteSurveyPost">
                                 <div class="input-group">
-                                    <input type="text" class="form-control" placeholder="Survey Name" name="name"
+                                    <input type="text" class="form-control" placeholder="Survey Name" name="survey"
                                         aria-describedby="basic-addon1">
                                 </div>
                                 <br />
-                                <label>available Times</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" placeholder="User" name="name"
+                                        aria-describedby="basic-addon1">
+                                </div>
                                 <br />
-                                <label>Please write as yyy-mm-dd hh:mm:ss</label>
+                                <label>Available Times</label>
+                                <br />
+                                <label>Please write as yyy-mm-dd hh:mm:ss <br/>
+                                    Use the + button to vote on multiple options
+                                </label>
                                 <button type="button" id="add-times">+</button>
                                 <div class="input-group" id="proposed-time-id">
-                                    <input type="text" class="form-control" name="proposed_times"
+                                    <input type="text" class="form-control" name="times"
                                         aria-describedby="basic-addon1">
                                 </div>
                                 <br />
@@ -31,7 +38,7 @@
                             </form>
                             <script>
                                 $("#add-times").click(function () {
-                                  $("#proposed-time-id").append('            <div class="form-group">              <input type="text" class="form-control" name="proposed_times" aria-describedby="basic-addon1">            </div><br/>')
+                                  $("#proposed-time-id").append('            <div class="form-group">              <input type="text" class="form-control" name="times" aria-describedby="basic-addon1">            </div><br/>')
                                 });
                               </script>
                         </div>
