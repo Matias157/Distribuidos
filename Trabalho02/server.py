@@ -18,36 +18,8 @@ app = Flask(__name__)
 app.config["REDIS_URL"] = "redis://localhost"
 app.register_blueprint(sse, url_prefix="/stream")
 
-SURVEYS =   {
-                "Meeting":  {
-                                "name": "Meeting", 
-                                "attendants":   [
-                                                    "Alexandre"
-                                                ], 
-                                "place": "ExxonMobil", 
-                                "proposed_times":   [ 
-                                                        {
-                                                            "2021-12-01 12:00:00": 0
-                                                        }, 
-                                                        {
-                                                            "2021-12-02 12:00:00": 0
-                                                        }, 
-                                                        {
-                                                            "2021-12-03 12:00:00": 0
-                                                        }
-                                                    ], 
-                                "deadline": "2021-11-21 16:54:00",
-                                "state": "Ongoing"
-                            }
-            }
-USERS = {
-            "Alexandre":    {
-                                "name": "Alexandre"
-                            },
-            "Matheus":      {
-                                "name": "Matheus"
-                            }
-        }
+SURVEYS = {}
+USERS = {}
 
 @app.route("/survey", methods=["GET"])
 def getSurveys():
@@ -150,7 +122,7 @@ def notifySurvey():
     with app.app_context():
         while(True):
             if list(SURVEYS.keys()):
-                for survey in SURVEYS:
+                for survey in list(SURVEYS):
                     if SURVEYS[survey]["state"] == "Ongoing":
                         survey_names = SURVEYS[survey]["attendants"]
                         names = []

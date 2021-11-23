@@ -8,6 +8,7 @@ var flash = require('connect-flash');
 var urlencodedParser = bodyParser.urlencoded({ extended: false });
 
 var router = express.Router();
+var username;
 
 // Heads to Starter Page
 // LOGIN Submit -
@@ -35,6 +36,7 @@ router.get("/newSurvey", function (req, res) {
 
 // HTTP POST New Survey on server.
 router.post('/newSurveyPost', urlencodedParser, function (req, res) {
+    req.body.creator = username;
     console.log(req.body);
 
     const options = {
@@ -114,6 +116,7 @@ router.get("/voteSurvey", function (req, res) {
 
 // HTTP POST Send Vote option to server.
 router.post("/voteSurveyPost", urlencodedParser, function(req, res){
+    req.body.name = username;
     console.log(req.body);
 
     const options = {
@@ -154,7 +157,7 @@ router.get("/getSurveyData", function (req, res) {
     const options = {
         hostname: 'localhost',
         port: 5000,
-        path: '/survey/consult?survey=' + req.query.survey + '&name=' + req.query.name,
+        path: '/survey/consult?survey=' + req.query.survey + '&name=' + username,
         method: 'GET'
     }
 
@@ -181,15 +184,14 @@ router.get("/getSurveyData", function (req, res) {
 
 
 // Login the user, redirect to home page for logged user.
-router.post("/login", function (req, res, next) {
-    var username = req.body.username;
-
+router.post("/login", urlencodedParser, function (req, res, next) {
+    username = req.body.name;
     // Se der certo preciso passar essa var pra const e universal.
 
     const options = {
         hostname: 'localhost',
         port: 5000,
-        path: '/survey', // TODO: Change to correct PATH
+        path: '/user', // TODO: Change to correct PATH
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -200,11 +202,12 @@ router.post("/login", function (req, res, next) {
 
     console.log(data);
 
-    const req1 = http.request(options, res => {
-        console.log(`statusCode: ${res.statusCode}`)
+    const req1 = http.request(options, resp => {
+        console.log(`statusCode: ${resp.statusCode}`)
 
-        res.on('data', d => {
+        resp.on('data', d => {
             process.stdout.write(d)
+            res.render("home")
         })
     })
 
@@ -214,8 +217,6 @@ router.post("/login", function (req, res, next) {
 
     req1.write(data)
     req1.end();
-
-
 });
 
 // Exporta Router para o NodeJS se comunicar com outros arquivos

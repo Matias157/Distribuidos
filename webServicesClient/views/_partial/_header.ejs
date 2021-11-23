@@ -4,15 +4,18 @@
 <head>
   <meta charset="utf-8" />
   <title>Doodle 2.0. Easier!</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/event-source-polyfill/0.0.9/  eventsource.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/event-source-polyfill/0.0.9/eventsource.min.js"></script>
   <script>
-    const es = new EventSource('http://localhost:3000/sse');
+    const es = new EventSource('http://localhost:5000/stream');
 
     const listener = function (event) {
       const type = event.type;
 
-      window.console.log(`${type}: ${event.data || es.url}`);
-
+      if (type != 'error') {
+        window.console.log(`${type}: ${event.data || es.url}`);
+        alert(`${type}: ${event.data || es.url}`);
+      }
+      
       if (type === 'result') {
         es.close();
       }
