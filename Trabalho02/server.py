@@ -135,7 +135,7 @@ def notifySurvey():
                             for time_s in SURVEYS[survey]["proposed_times"]:
                                 for time in time_s:
                                     return_string += " - " + time + " - votes: " + str(time_s[time]) + "\n"
-                            sse.publish(return_string, channel=survey)
+                            sse.publish(return_string)
                             SURVEYS[survey]["state"] = "Closed"
                         else:
                             pass
