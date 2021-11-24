@@ -53,7 +53,7 @@ def postSurvey():
         SURVEYS[request_data["name"]] = {"name": request_data["name"], "attendants": [request_data["creator"]], "place": request_data["place"], "proposed_times":[], "deadline": request_data["deadline"], "state": "Ongoing"}
         for time in request_data["proposed_times"]:
             SURVEYS[request_data["name"]]["proposed_times"].append({time: 0})
-        sse.publish("\n------------------\nNew survey created!\n" + "Survey: " + request_data["name"] + "\nCreator: " + request_data["creator"] + "\nPlace: " + request_data["place"] + "\nProposed times: " + str(request_data["proposed_times"]) + "\nDeadline: " + request_data["deadline"] + "\n------------------")
+        sse.publish("\n------------------\nNew survey created!\n" + "Survey: " + request_data["name"] + "\nCreator: " + request_data["creator"] + "\nPlace: " + request_data["place"] + "\nProposed times: " + str(request_data["proposed_times"]) + "\nDeadline: " + request_data["deadline"] + "\n------------------", type="create")
     return SURVEYS[request_data["name"]]
 
 @app.route("/user", methods=["POST"])
@@ -63,6 +63,7 @@ def postUser():
         return "Bad Request!"
     if request_data["name"] not in USERS:
         USERS[request_data["name"]] = {"name": request_data["name"]}
+    sse.publish(request_data["name"])
     return USERS[request_data["name"]]
 
 @app.route("/survey/vote", methods=["GET"])
@@ -135,7 +136,8 @@ def notifySurvey():
                             for time_s in SURVEYS[survey]["proposed_times"]:
                                 for time in time_s:
                                     return_string += " - " + time + " - votes: " + str(time_s[time]) + "\n"
-                            sse.publish(return_string)
+                            for name in names:
+                                sse.publish(return_string, type=name)
                             SURVEYS[survey]["state"] = "Closed"
                         else:
                             pass

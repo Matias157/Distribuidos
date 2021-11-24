@@ -8,14 +8,15 @@ var flash = require('connect-flash');
 var urlencodedParser = bodyParser.urlencoded({ extended: false });
 
 var router = express.Router();
-var username;
+var username = "";
 
 // Heads to Starter Page
 // LOGIN Submit -
 router.get("/", function (req, res, next) {
 
     console.log("Starter page");
-    res.render("home/index");
+    //res.render("../../views/_partial/_header.ejs", { username: username });
+    res.render("home/index", { username: username });
 
 });
 
@@ -186,6 +187,7 @@ router.get("/getSurveyData", function (req, res) {
 // Login the user, redirect to home page for logged user.
 router.post("/login", urlencodedParser, function (req, res, next) {
     username = req.body.name;
+    module.exports = { username : username };
     // Se der certo preciso passar essa var pra const e universal.
 
     const options = {
@@ -207,7 +209,6 @@ router.post("/login", urlencodedParser, function (req, res, next) {
 
         resp.on('data', d => {
             process.stdout.write(d)
-            res.render("home")
         })
     })
 

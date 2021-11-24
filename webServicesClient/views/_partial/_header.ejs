@@ -7,13 +7,29 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/event-source-polyfill/0.0.9/eventsource.min.js"></script>
   <script>
     const es = new EventSource('http://localhost:5000/stream');
+    var first_request = true;
+    var second_request = false;
 
     const listener = function (event) {
       const type = event.type;
-
+      var username = "temp";
       if (type != 'error') {
-        window.console.log(`${type}: ${event.data || es.url}`);
-        alert(`${type}: ${event.data || es.url}`);
+        if (first_request) {
+          if (second_request){
+            username = event.data;
+            console.log(username);
+            first_request = false;
+          }
+          second_request = true;
+        }
+        if (type === 'create'){
+          window.console.log(`${type}: ${event.data || es.url}`);
+          alert(`${type}: ${event.data || es.url}`);
+        } 
+        else if (type === username){
+          window.console.log(`${type}: ${event.data || es.url}`);
+          alert(`${type}: ${event.data || es.url}`);
+        }
       }
       
       if (type === 'result') {
