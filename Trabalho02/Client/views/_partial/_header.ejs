@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <title>Doodle 2.0. Easier!</title>
+  <% if(hasUsername) { %>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/event-source-polyfill/0.0.9/eventsource.min.js"></script>
+    <script>
+      var username = "<%= username %>";
+      const es = new EventSource('http://localhost:5000/stream');
+
+      const listener = function (event) {
+        const type = event.type;
+
+        if (type != 'error') {
+          window.console.log(`${type}: ${event.data || es.url}`);
+          alert(`${type}: ${event.data || es.url}`);
+        }
+        
+        if (type === 'result') {
+          es.close();
+        }
+      };
+
+      es.addEventListener('created', listener);
+      es.addEventListener(username, listener);
+    </script>
+  <% } %>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <!-- <link rel="stylesheet" type="text/css" href="css/bootstrap-datetimepicker.css"> -->
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.15.1/moment.min.js"></script>
+  <link rel="stylesheet" type="text/css"
+    href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.43/css/bootstrap-datetimepicker.min.css">
+  <link rel="stylesheet" type="text/css"
+    href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.43/css/bootstrap-datetimepicker-standalone.css">
+  <script type="text/javascript"
+    src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.43/js/bootstrap-datetimepicker.min.js"></script>
+
+  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+
+</head>
+
+<body>
+  <div class="navbar navbar-default navbar-static-top" role="navigation">
+    <div class="container">
+      <div class="navbar-header">
+        <a class="navbar-brand" href="/">Doodle 2.0</a>
+      </div>
+      <ul class="nav navbar-nav navbar-right">
+        <li><a href="/home">Home</a></li>
+
+        <% if(currentUser !=null) { %>
+          <li><a href="#">Welcome, <%= currentUser.username%> !</a></li>
+          <li><a href="/newSurvey">Create new survey</a></li>
+          <li><a href="/Consult Surveys">Consult surveys</a></li>
+          <%} %>
+      </ul>
+    </div>
+  </div>
+
+  <div class="container">
